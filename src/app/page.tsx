@@ -8,6 +8,9 @@ export default function Home() {
   const [tweets, setTweets] = useState<string[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [startDate, setStartDate] = useState<string>(""); // YYYY-MM-DD
+  const [timezone, setTimezone] = useState<string>(Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Los_Angeles");
+  const [postTime, setPostTime] = useState<string>("21:00"); // HH:mm
   const [loadingParse, setLoadingParse] = useState(false);
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +52,13 @@ export default function Home() {
       const res = await fetch("/api/schedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tweets, socialAccountIds: selectedIds }),
+        body: JSON.stringify({
+          tweets,
+          socialAccountIds: selectedIds,
+          startDate: startDate || undefined,
+          timezone: timezone || undefined,
+          postTimeLocal: postTime || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
@@ -96,25 +105,65 @@ export default function Home() {
       )}
 
       <div className="space-y-2">
-        <h2 className="text-lg font-medium">Select accounts</h2>
+        <h2 className="text-lg font-medium">Select accounts (Twitter/X)</h2>
         {accounts.length === 0 ? (
-          <p className="text-sm opacity-70">No accounts found.</p>
+          <p className="text-sm opacity-70">No Twitter/X accounts found.</p>
         ) : (
-          <div className="flex flex-wrap gap-3">
-            {accounts.map((a) => (
-              <label key={a.id} className="flex items-center gap-2 border px-3 py-2 rounded-md">
-                <input
-                  type="checkbox"
-                  checked={!!selected[a.id]}
-                  onChange={(e) =>
-                    setSelected((s) => ({ ...s, [a.id]: e.target.checked }))
-                  }
-                />
-                <span className="text-sm">{a.platform}{a.username ? ` • @${a.username}` : ""}</span>
-              </label>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {accounts.map((a) => {
+              const active = !!selected[a.id];
+              return (
+                <button
+                  type="button"
+                  key={a.id}
+                  onClick={() => setSelected((s) => ({ ...s, [a.id]: !active }))}
+                  className={`text-left p-4 rounded-md border transition-colors ${
+                    active
+                      ? "border-black dark:border-white bg-black/5 dark:bg-white/10"
+                      : "border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5"
+                  }`}
+                >
+                  <div className="text-sm font-medium">{a.username ? `@${a.username}` : a.id}</div>
+                  <div className="text-xs opacity-70">{a.platform}</div>
+                </button>
+              );
+            })}
           </div>
         )}
+      </div>
+
+      <div className="space-y-2">
+        <h2 className="text-lg font-medium">Schedule options</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm">Start date</label>
+            <input
+              type="date"
+              className="px-3 py-2 rounded-md border border-black/10 dark:border-white/10 bg-transparent"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm">Post time (HH:mm)</label>
+            <input
+              type="time"
+              className="px-3 py-2 rounded-md border border-black/10 dark:border-white/10 bg-transparent"
+              value={postTime}
+              onChange={(e) => setPostTime(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm">Timezone</label>
+            <input
+              type="text"
+              className="px-3 py-2 rounded-md border border-black/10 dark:border-white/10 bg-transparent"
+              placeholder="e.g. America/Los_Angeles"
+              value={timezone}
+              onChange={(e) => setTimezone(e.target.value)}
+            />
+          </div>
+        </div>
       </div>
 
       {error && (

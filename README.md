@@ -42,6 +42,12 @@ npm run dev
 
 Deploy to Vercel. Configure the same environment variables in your project settings.
 
+One-click deploy:
+
+```md
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyour-org%2Fpostbridge-client&env=OPENAI_API_KEY,POSTBRIDGE_API_KEY&envDescription=Required%20keys&envLink=https%3A%2F%2Fapi.post-bridge.com%2Freference%23tag%2Fpost-results&project-name=postbridge-client&repository-name=postbridge-client)
+```
+
 ### Security
 
 - Never commit `.env*` files; `.gitignore` already excludes them

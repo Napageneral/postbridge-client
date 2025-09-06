@@ -2,7 +2,7 @@ import { getEnv } from "@/lib/env";
 
 export type SocialAccount = {
   id: string;
-  platform: string;
+  platform: string; // lower-case platform identifier (e.g., "twitter", "x")
   username?: string | null;
 };
 
@@ -41,11 +41,12 @@ export async function fetchSocialAccounts(): Promise<SocialAccount[]> {
   }
   const data = await res.json();
   // Shape to minimal type
-  const accounts: SocialAccount[] = (Array.isArray(data) ? data : data?.items || []).map((a: any) => ({
-    id: String(a.id),
-    platform: String(a.platform || a.provider || ""),
-    username: a.username ?? a.handle ?? null,
-  }));
+  const accounts: SocialAccount[] = (Array.isArray(data) ? data : data?.items || []).map((a: any) => {
+    const rawPlatform = String(a.platform || a.provider || a.type || "");
+    const platform = rawPlatform.toLowerCase();
+    const username = a.username ?? a.handle ?? a.screenName ?? null;
+    return { id: String(a.id), platform, username };
+  });
   return accounts;
 }
 
