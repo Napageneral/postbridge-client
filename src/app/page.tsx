@@ -94,9 +94,23 @@ export default function Home() {
     setTweets((prev) => prev.map((t, i) => (i === index ? text : t)));
   }
 
+  const prompt = "Based on your memory of our chat logs, and the following guidance: If you want to get rich on X, it isn't going to be through creator revenue or meme coins. Instead, think about one subject matter that you know more about than anyone else in the world. It can be anything: plumbing, menswear, Indian food, furniture, social apps, whatever. Post one unexpected insight you picked from your experience in that area. Keep it under 5 sentences. Do this every day for 6 months. If you stick to it, we will promote your account to others. By the end, you will be recognized as the world's leading expert in that subject area and you can charge whatever you want for endorsements, your time, or whatever. And no one will be able to take that way from you. What is my subject matter that I know more about than anyone else and what are some examples of unexpected insights I could offer under 5 sentences?";
+
   return (
     <div className="font-sans max-w-3xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Postbridge Tweet Scheduler</h1>
+      <div className="space-y-3">
+        <img src="/nikita-hero.png" alt="Nikita's tweet" className="w-full rounded-xl border border-black/10 dark:border-white/10" />
+        <h1 className="text-3xl font-semibold">Tweet Like Nikita</h1>
+        <div className="flex items-center gap-3">
+          <p className="text-sm opacity-80">Copy the starter prompt, paste into ChatGPT or Claude, then paste the results here to schedule them out automatically.</p>
+          <button
+            onClick={() => navigator.clipboard.writeText(prompt)}
+            className="ml-auto text-sm px-3 py-2 rounded-md border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/10"
+          >
+            Copy prompt
+          </button>
+        </div>
+      </div>
 
       <div className="space-y-2">
         <label className="text-sm">Paste your text</label>
