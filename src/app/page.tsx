@@ -17,27 +17,33 @@ export default function Home() {
   const [loadingParse, setLoadingParse] = useState(false);
   const [loadingSchedule, setLoadingSchedule] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openaiStatus, setOpenaiStatus] = useState<"idle" | "valid" | "invalid">("idle");
+  const [postbridgeStatus, setPostbridgeStatus] = useState<"idle" | "valid" | "invalid">("idle");
   const selectedIds = useMemo(
     () => Object.entries(selected).filter(([, v]) => v).map(([k]) => k),
     [selected]
   );
 
   useEffect(() => {
+    if (!clientPostbridgeKey) setPostbridgeStatus("idle");
     const qs = clientPostbridgeKey ? `?key=${encodeURIComponent(clientPostbridgeKey)}` : "";
     fetch(`/api/accounts${qs}`)
       .then(async (r) => {
         const d = await r.json();
         if (r.ok) {
           setAccounts(d.accounts || []);
+          if (clientPostbridgeKey) setPostbridgeStatus("valid");
           // Only surface an error if user provided a key and still failed
           if (d?.error && clientPostbridgeKey) setError(d.error);
         } else {
           setAccounts([]);
+          if (clientPostbridgeKey) setPostbridgeStatus("invalid");
           if (clientPostbridgeKey) setError(d?.error || "Failed to fetch accounts. Check your API key.");
         }
       })
       .catch((e) => {
         setAccounts([]);
+        if (clientPostbridgeKey) setPostbridgeStatus("invalid");
         if (clientPostbridgeKey) setError(e?.message || "Failed to fetch accounts");
       });
   }, [clientPostbridgeKey]);
@@ -66,8 +72,10 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
       setTweets(data.tweets || []);
+      setOpenaiStatus("valid");
     } catch (e: any) {
       setError(e?.message || "Parse failed");
+      setOpenaiStatus("invalid");
     } finally {
       setLoadingParse(false);
     }
@@ -139,8 +147,39 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Step 1: OpenAI key */}
+      <div className="card">
+        <div className="card-content flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-medium">Step 1 – OpenAI API key</h2>
+            <span className={`text-xs rounded-full px-2 py-0.5 border ${openaiStatus === "valid" ? "text-green-600 border-green-600" : openaiStatus === "invalid" ? "text-red-600 border-red-600" : "opacity-60 border-black/20"}`}>{openaiStatus === "valid" ? "Valid" : openaiStatus === "invalid" ? "Invalid" : "Waiting"}</span>
+          </div>
+          <input
+            type="password"
+            className="input"
+            placeholder="sk-..."
+            value={clientOpenAIKey}
+            onChange={(e) => setClientOpenAIKey(e.target.value)}
+          />
+          <p className="text-xs opacity-80">
+            Required on the hosted demo to parse your long text into tweet-sized posts.
+            <a
+              href="https://platform.openai.com/settings/organization/api-keys"
+              target="_blank"
+              rel="noreferrer"
+              className="ml-1 underline"
+            >
+              Get an OpenAI API key
+            </a>
+            .
+          </p>
+        </div>
+      </div>
+
+      {/* Step 2: Paste + Parse */}
       <div className="card">
         <div className="card-content space-y-2">
+          <h2 className="text-sm font-medium">Step 2 – Paste text and parse</h2>
           <textarea
             aria-label="Input text to parse into tweets"
             className="input w-full h-48"
@@ -158,64 +197,40 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="card">
-          <div className="card-content flex flex-col gap-1">
-            <label className="text-sm">OpenAI API key</label>
-            <input
-              type="password"
-              className="input"
-              placeholder="sk-..."
-              value={clientOpenAIKey}
-              onChange={(e) => setClientOpenAIKey(e.target.value)}
-            />
-            <p className="text-xs opacity-80">
-              Required on the hosted demo to parse your long text into tweet-sized posts. You can
-              create/manage keys in your provider dashboard.
-              <a
-                href="https://platform.openai.com/settings/organization/api-keys"
-                target="_blank"
-                rel="noreferrer"
-                className="ml-1 underline"
-              >
-                Get an OpenAI API key
-              </a>
-              .
-            </p>
-            <p className="text-xs opacity-70">Keys typed here live only in your browser memory. Prefer deploying your own and setting env vars. Use throwaway keys if entering here.</p>
+      {/* Step 3: Post-Bridge key */}
+      <div className="card">
+        <div className="card-content flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-medium">Step 3 – Post-Bridge API key</h2>
+            <span className={`text-xs rounded-full px-2 py-0.5 border ${postbridgeStatus === "valid" ? "text-green-600 border-green-600" : postbridgeStatus === "invalid" ? "text-red-600 border-red-600" : "opacity-60 border-black/20"}`}>{postbridgeStatus === "valid" ? "Valid" : postbridgeStatus === "invalid" ? "Invalid" : "Waiting"}</span>
           </div>
-        </div>
-        <div className="card">
-          <div className="card-content flex flex-col gap-1">
-            <label className="text-sm">Post-Bridge API key</label>
-            <input
-              type="password"
-              className="input"
-              placeholder="pb_live_..."
-              value={clientPostbridgeKey}
-              onChange={(e) => setClientPostbridgeKey(e.target.value)}
-            />
-            <p className="text-xs opacity-80">
-              Required to schedule posts. Post-Bridge lets you publish across
-              social platforms via one API. You’ll need an account and API key.
-              <a
-                href="https://www.post-bridge.com/dashboard/api-keys"
-                target="_blank"
-                rel="noreferrer"
-                className="ml-1 underline"
-              >
-                Get a Post-Bridge API key
-              </a>
-              .
-            </p>
-            <p className="text-xs opacity-70">Keys typed here live only in your browser memory. Prefer deploying your own and setting env vars. Use throwaway keys if entering here.</p>
-          </div>
+          <input
+            type="password"
+            className="input"
+            placeholder="pb_live_..."
+            value={clientPostbridgeKey}
+            onChange={(e) => setClientPostbridgeKey(e.target.value)}
+          />
+          <p className="text-xs opacity-80">
+            Required to select your Twitter/X account and schedule posts.
+            <a
+              href="https://www.post-bridge.com/dashboard/api-keys"
+              target="_blank"
+              rel="noreferrer"
+              className="ml-1 underline"
+            >
+              Get a Post-Bridge API key
+            </a>
+            . Keys typed here live only in your browser memory.
+          </p>
         </div>
       </div>
 
-      {tweets.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-lg font-medium">Preview ({tweets.length})</h2>
+      <div className="space-y-2">
+        <h2 className="text-sm font-medium">Step 4 – Review and edit {tweets.length > 0 ? `(${tweets.length})` : ""}</h2>
+        {tweets.length === 0 ? (
+          <p className="text-sm opacity-70">No tweets yet — paste text above and click Parse.</p>
+        ) : (
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {tweets.map((t, i) => {
               const over = (t || "").length > 280;
@@ -266,11 +281,11 @@ export default function Home() {
               );
             })}
           </ul>
-        </div>
-      )}
+        )}
+      </div>
 
       <div className="space-y-2">
-        <h2 className="text-lg font-medium">Select accounts (Twitter/X)</h2>
+        <h2 className="text-sm font-medium">Step 5 – Select accounts (Twitter/X)</h2>
         {accounts.length === 0 ? (
           <p className="text-sm opacity-70">No Twitter/X accounts found.</p>
         ) : (
@@ -299,7 +314,7 @@ export default function Home() {
 
       <div className="card">
         <div className="card-content">
-          <h2 className="text-lg font-medium mb-3">Schedule options</h2>
+          <h2 className="text-sm font-medium mb-3">Step 6 – Schedule options</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="flex flex-col gap-1">
               <label className="text-sm">Start date</label>
