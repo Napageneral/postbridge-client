@@ -1,95 +1,89 @@
-## PostBridge Daily Tweet Scheduler
+## Postbridge Tweet Scheduler (Next.js)
 
-A tiny CLI that:
+A minimal Next.js (TypeScript) web app to:
 
-- Parses a block of text with an LLM into discrete tweet-sized posts
-- Schedules one tweet per day at 9:00 PM for N consecutive days via PostBridge
-- Provides a dry-run mode and utilities to list your connected social accounts
+- Paste long text
+- Parse it into discrete tweet-sized posts via an LLM
+- Schedule one per day at 9pm using Post-Bridge across selected social accounts
 
-References: see the PostBridge API docs at [Post Results](https://api.post-bridge.com/reference#tag/post-results).
+### Quick Start
 
-### Features
-
-- LLM-based parsing (OpenAI by default) with a safe heuristic fallback
-- Timezone-aware scheduling (defaults to your local TZ) at 21:00 daily
-- Chooses specific social account(s) to schedule to (e.g., X/Twitter)
-- Dry-run prints the planned schedule without calling the API
-
-### Quickstart
-
-1) Create and activate a virtual environment
+1) Install deps
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+npm install
 ```
 
-2) Install dependencies
+2) Configure environment
+
+Copy `.env.example` to `.env.local` and set your keys:
 
 ```bash
-pip install -r requirements.txt
+cp .env.example .env.local
 ```
 
-3) Configure environment
+Environment variables:
 
-Copy the example file and fill in your keys. Never commit real keys.
+- `OPENAI_API_KEY`: LLM provider key (or other compatible provider)
+- `POSTBRIDGE_API_KEY`: Post-Bridge API key
+- `POSTBRIDGE_BASE_URL` (optional): defaults to `https://api.post-bridge.com`
+- `DEFAULT_TIMEZONE` (optional): IANA TZ for scheduling (e.g. `America/Los_Angeles`)
+- `DEFAULT_POST_HOUR_LOCAL` (optional): local hour (0–23), defaults to `21` (9pm)
+
+3) Run dev server
 
 ```bash
-cp .env.example .env
+npm run dev
 ```
 
-Edit `.env` and set:
+4) Open `http://localhost:3000`
 
-- `POSTBRIDGE_API_KEY` = your PostBridge API key
-- `OPENAI_API_KEY` = your OpenAI API key (if using the LLM parser)
-- Optional `POSTBRIDGE_BASE_URL` (defaults to `https://api.post-bridge.com`)
-- Optional `DEFAULT_TZ` (IANA name like `America/Los_Angeles`)
+### Deployment
 
-4) List your social accounts (to grab the ID for X/Twitter)
+Deploy to Vercel. Configure the same environment variables in your project settings.
 
-```bash
-python cli.py list-accounts
-```
+### Security
 
-5) Parse and schedule from a text file (dry-run first)
-
-```bash
-python cli.py schedule \
-  --social-account-id YOUR_TWITTER_ACCOUNT_ID \
-  --tz America/Los_Angeles \
-  --time 21:00 \
-  --start-date 2025-01-02 \
-  --max 30 \
-  --dry-run \
-  --file path/to/your_input.txt
-```
-
-Pipe input works too:
-
-```bash
-cat notes.txt | python cli.py schedule --social-account-id YOUR_TWITTER_ACCOUNT_ID --dry-run
-```
-
-Remove `--dry-run` to actually create scheduled posts via PostBridge.
+- Never commit `.env*` files; `.gitignore` already excludes them
+- API keys are only used server-side in API routes
 
 ### Notes
 
-- The tool defaults to 9:00 PM local time daily; use `--tz` and `--time` to override
-- If the LLM is not available or errors, a heuristic splitter will be used
-- Tweets are capped at 280 chars by default (soft limit) before scheduling
+- All code is TypeScript and raw HTTP/JSON. No ORM is used for queries.
+- Post-Bridge API docs: `https://api.post-bridge.com/reference#tag/post-results`
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-### Environment
+## Getting Started
 
-All secrets are read from `.env` via `python-dotenv`. `.env` is included in `.gitignore`.
+First, run the development server:
 
-### Development
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-- Python 3.10+ recommended
-- No package `__init__.py` files are used
-- No ORMs are used; no database required
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### License
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-MIT. See `LICENSE` (optional to add).
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Learn More
 
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
