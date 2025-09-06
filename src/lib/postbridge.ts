@@ -33,7 +33,7 @@ function getHeaders(apiKeyOverride?: string) {
 }
 
 function getBaseUrl() {
-  return getEnv().POSTBRIDGE_BASE_URL.replace(/\/$/, "");
+  return "https://api.post-bridge.com";
 }
 
 export async function fetchSocialAccounts(apiKeyOverride?: string): Promise<SocialAccount[]> {

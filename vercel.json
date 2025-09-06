@@ -2,9 +2,6 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "outputDirectory": ".next",
-  "env": {
-    "POSTBRIDGE_BASE_URL": "https://api.post-bridge.com"
-  }
+  "outputDirectory": ".next"
 }
 

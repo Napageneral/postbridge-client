@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const env = getEnv();
-    const url = `${env.POSTBRIDGE_BASE_URL.replace(/\/$/, "")}/v1/social-accounts`;
+    const url = `https://api.post-bridge.com/v1/social-accounts`;
     const res = await fetch(url, {
       headers: {
         "Content-Type": "application/json",

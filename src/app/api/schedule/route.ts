@@ -5,7 +5,6 @@ export const dynamic = "force-dynamic";
 import { z } from "zod";
 import { DateTime } from "luxon";
 import { createPost } from "@/lib/postbridge";
-import { getEnv } from "@/lib/env";
 
 const Body = z.object({
   tweets: z.array(z.string().min(1)).min(1),
@@ -22,9 +21,8 @@ export async function POST(req: NextRequest) {
       await req.json()
     );
 
-    const env = getEnv();
-    const tz = timezone || env.DEFAULT_TIMEZONE;
-    const defaultHour = parseInt(env.DEFAULT_POST_HOUR_LOCAL, 10) || 21;
+    const tz = timezone || "America/Los_Angeles";
+    const defaultHour = 21;
     const [h, m] = (postTimeLocal || `${defaultHour}:00`).split(":").map((s) => parseInt(s, 10));
 
     const start = startDate

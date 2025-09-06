@@ -64,7 +64,7 @@ export default function RootLayout({
           <div className="flex items-center justify-between mb-6">
             <div />
             <a
-              href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FNapageneral%2Fpostbridge-client&project-name=tweet-like-nikita&repository-name=postbridge-client&env=OPENAI_API_KEY,POSTBRIDGE_API_KEY,POSTBRIDGE_BASE_URL,DEFAULT_TIMEZONE,DEFAULT_POST_HOUR_LOCAL&envDescription=LLM%20and%20Post-Bridge%20keys&envLink=https%3A%2F%2Fwww.post-bridge.com%2Fdashboard%2Fapi-keys"
+              href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FNapageneral%2Fpostbridge-client&project-name=tweet-like-nikita&repository-name=postbridge-client&env=OPENAI_API_KEY,POSTBRIDGE_API_KEY&envDescription=LLM%20and%20Post-Bridge%20keys&envLink=https%3A%2F%2Fwww.post-bridge.com%2Fdashboard%2Fapi-keys"
               target="_blank"
               rel="noreferrer"
               className="btn"
