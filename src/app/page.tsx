@@ -127,8 +127,8 @@ export default function Home() {
 
       <div className="card">
         <div className="card-content space-y-2">
-          <label className="text-sm">Paste your text</label>
           <textarea
+            aria-label="Input text to parse into tweets"
             className="input w-full h-48"
             value={input}
             onChange={(e) => setInput(e.target.value)}
