@@ -20,11 +20,15 @@ type CreatePostPayload = {
   };
 };
 
-function getHeaders() {
+function getHeaders(apiKeyOverride?: string) {
   const env = getEnv();
+  const key = apiKeyOverride && apiKeyOverride.trim().length > 0 ? apiKeyOverride : env.POSTBRIDGE_API_KEY;
+  // Try both common API key patterns
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${env.POSTBRIDGE_API_KEY}`,
+    Accept: "application/json",
+    Authorization: `Bearer ${key}`,
+    "x-api-key": key,
   } as const;
 }
 
@@ -32,16 +36,24 @@ function getBaseUrl() {
   return getEnv().POSTBRIDGE_BASE_URL.replace(/\/$/, "");
 }
 
-export async function fetchSocialAccounts(): Promise<SocialAccount[]> {
+export async function fetchSocialAccounts(apiKeyOverride?: string): Promise<SocialAccount[]> {
   const url = `${getBaseUrl()}/v1/social-accounts`;
-  const res = await fetch(url, { headers: getHeaders(), cache: "no-store" });
+  const res = await fetch(url, { headers: getHeaders(apiKeyOverride), cache: "no-store" });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Failed to fetch accounts: ${res.status} ${text}`);
   }
   const data = await res.json();
+  // API may return { data: [...] } or { items: [...] } or an array
+  const list: any[] = Array.isArray(data)
+    ? data
+    : Array.isArray((data as any)?.data)
+    ? (data as any).data
+    : Array.isArray((data as any)?.items)
+    ? (data as any).items
+    : [];
   // Shape to minimal type
-  const accounts: SocialAccount[] = (Array.isArray(data) ? data : data?.items || []).map((a: any) => {
+  const accounts: SocialAccount[] = list.map((a: any) => {
     const rawPlatform = String(a.platform || a.provider || a.type || "");
     const platform = rawPlatform.toLowerCase();
     const username = a.username ?? a.handle ?? a.screenName ?? null;
@@ -50,11 +62,11 @@ export async function fetchSocialAccounts(): Promise<SocialAccount[]> {
   return accounts;
 }
 
-export async function createPost(payload: CreatePostPayload): Promise<CreatedPost> {
+export async function createPost(payload: CreatePostPayload, apiKeyOverride?: string): Promise<CreatedPost> {
   const url = `${getBaseUrl()}/v1/posts`;
   const res = await fetch(url, {
     method: "POST",
-    headers: getHeaders(),
+    headers: getHeaders(apiKeyOverride),
     body: JSON.stringify(payload),
   });
   if (!res.ok) {

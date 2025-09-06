@@ -2,13 +2,13 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { extractTweetsFromText } from "@/lib/llm";
 
-const Body = z.object({ text: z.string().min(1) });
+const Body = z.object({ text: z.string().min(1), openaiApiKey: z.string().optional() });
 
 export async function POST(req: NextRequest) {
   try {
     const json = await req.json();
-    const { text } = Body.parse(json);
-    const tweets = await extractTweetsFromText(text);
+    const { text, openaiApiKey } = Body.parse(json);
+    const tweets = await extractTweetsFromText(text, openaiApiKey);
     return new Response(JSON.stringify({ tweets }), {
       headers: { "Content-Type": "application/json" },
     });

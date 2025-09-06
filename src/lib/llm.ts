@@ -1,13 +1,17 @@
 import OpenAI from "openai";
 import { getEnv } from "@/lib/env";
 
-export function getOpenAIClient() {
+export function getOpenAIClient(apiKeyOverride?: string) {
   const env = getEnv();
-  return new OpenAI({ apiKey: env.OPENAI_API_KEY });
+  const apiKey = apiKeyOverride && apiKeyOverride.trim().length > 0 ? apiKeyOverride : env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is required for parsing. Set it in your environment or provide a client-side key.");
+  }
+  return new OpenAI({ apiKey });
 }
 
-export async function extractTweetsFromText(input: string): Promise<string[]> {
-  const client = getOpenAIClient();
+export async function extractTweetsFromText(input: string, apiKeyOverride?: string): Promise<string[]> {
+  const client = getOpenAIClient(apiKeyOverride);
   const system = [
     "You split long text into discrete tweet candidates.",
     "Each tweet must be under 280 characters, plain text only, no numbering unless present in source, and no leading/trailing quotes.",
@@ -48,5 +52,4 @@ export async function extractTweetsFromText(input: string): Promise<string[]> {
     .map((t) => t.trim())
     .filter((t) => t.length > 0 && t.length <= 280);
 }
-
 

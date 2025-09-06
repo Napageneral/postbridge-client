@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 const EnvSchema = z.object({
-  OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY is required"),
+  // Make OPENAI_API_KEY optional so non-LLM routes (like Postbridge accounts)
+  // don't fail env validation when no OpenAI key is configured.
+  OPENAI_API_KEY: z.string().default(""),
   POSTBRIDGE_API_KEY: z.string().min(1, "POSTBRIDGE_API_KEY is required"),
   POSTBRIDGE_BASE_URL: z
     .string()
@@ -30,5 +32,4 @@ export function getEnv(): Env {
   }
   return parsed.data;
 }
-
 

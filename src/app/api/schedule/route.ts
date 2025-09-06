@@ -1,4 +1,7 @@
 import { NextRequest } from "next/server";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 import { z } from "zod";
 import { DateTime } from "luxon";
 import { createPost } from "@/lib/postbridge";
@@ -10,11 +13,12 @@ const Body = z.object({
   startDate: z.string().optional(), // ISO date-only in tz, e.g. 2025-09-07
   timezone: z.string().optional(), // IANA tz
   postTimeLocal: z.string().regex(/^\d{2}:\d{2}$/).optional(), // HH:mm
+  postbridgeApiKey: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
   try {
-    const { tweets, socialAccountIds, startDate, timezone, postTimeLocal } = Body.parse(
+    const { tweets, socialAccountIds, startDate, timezone, postTimeLocal, postbridgeApiKey } = Body.parse(
       await req.json()
     );
 
@@ -44,7 +48,7 @@ export async function POST(req: NextRequest) {
         scheduledAt,
         socialAccountIds,
         content: { default: { text } },
-      });
+      }, postbridgeApiKey);
       results.push({ index: i, text, scheduledAt, id: created.id });
     }
 
@@ -57,5 +61,3 @@ export async function POST(req: NextRequest) {
     });
   }
 }
-
-
