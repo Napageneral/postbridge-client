@@ -29,16 +29,30 @@ export default function Home() {
         const d = await r.json();
         if (r.ok) {
           setAccounts(d.accounts || []);
+          // Only surface an error if user provided a key and still failed
+          if (d?.error && clientPostbridgeKey) setError(d.error);
         } else {
           setAccounts([]);
-          setError(d?.error || "Failed to fetch accounts. Check your API key and restart dev server after changing env.");
+          if (clientPostbridgeKey) setError(d?.error || "Failed to fetch accounts. Check your API key.");
         }
       })
       .catch((e) => {
         setAccounts([]);
-        setError(e?.message || "Failed to fetch accounts");
+        if (clientPostbridgeKey) setError(e?.message || "Failed to fetch accounts");
       });
   }, [clientPostbridgeKey]);
+
+  // Re-validate OpenAI key on change by re-parsing if input exists (debounced)
+  useEffect(() => {
+    if (!clientOpenAIKey || !input.trim()) return;
+    const t = setTimeout(() => {
+      if (!loadingParse) {
+        handleParse();
+      }
+    }, 600);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientOpenAIKey]);
 
   async function handleParse() {
     setError(null);
@@ -147,7 +161,7 @@ export default function Home() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="card">
           <div className="card-content flex flex-col gap-1">
-            <label className="text-sm">OpenAI API key (optional, client-only)</label>
+            <label className="text-sm">OpenAI API key</label>
             <input
               type="password"
               className="input"
@@ -156,7 +170,7 @@ export default function Home() {
               onChange={(e) => setClientOpenAIKey(e.target.value)}
             />
             <p className="text-xs opacity-80">
-              Used only to parse your long text into tweet-sized posts. You can
+              Required on the hosted demo to parse your long text into tweet-sized posts. You can
               create/manage keys in your provider dashboard.
               <a
                 href="https://platform.openai.com/settings/organization/api-keys"
@@ -168,12 +182,12 @@ export default function Home() {
               </a>
               .
             </p>
-            <p className="text-xs opacity-70">Trust at your own peril. Prefer deploying your own and setting env vars. Use throwaway keys if entering here.</p>
+            <p className="text-xs opacity-70">Keys typed here live only in your browser memory. Prefer deploying your own and setting env vars. Use throwaway keys if entering here.</p>
           </div>
         </div>
         <div className="card">
           <div className="card-content flex flex-col gap-1">
-            <label className="text-sm">Post-Bridge API key (optional, client-only)</label>
+            <label className="text-sm">Post-Bridge API key</label>
             <input
               type="password"
               className="input"
@@ -194,7 +208,7 @@ export default function Home() {
               </a>
               .
             </p>
-            <p className="text-xs opacity-70">Trust at your own peril. Prefer deploying your own and setting env vars. Use throwaway keys if entering here.</p>
+            <p className="text-xs opacity-70">Keys typed here live only in your browser memory. Prefer deploying your own and setting env vars. Use throwaway keys if entering here.</p>
           </div>
         </div>
       </div>
