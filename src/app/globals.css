@@ -20,7 +20,26 @@
 }
 
 body {
-  background: var(--background);
+  background: radial-gradient(1200px 600px at 10% -10%, #dbeafe40, transparent),
+              radial-gradient(1000px 500px at 110% 10%, #fde68a40, transparent),
+              var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* shadcn-like card helpers */
+.card {
+  @apply rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] backdrop-blur-sm;
+}
+.card-content {
+  @apply p-4;
+}
+.btn {
+  @apply inline-flex items-center justify-center rounded-md border border-black/10 dark:border-white/10 px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/10;
+}
+.btn-primary {
+  @apply bg-black text-white dark:bg-white dark:text-black hover:opacity-90;
+}
+.input {
+  @apply px-3 py-2 rounded-md border border-black/10 dark:border-white/10 bg-transparent;
 }
