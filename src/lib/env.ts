@@ -3,7 +3,8 @@ import { z } from "zod";
 const EnvSchema = z.object({
   // OPENAI key optional for users who provide a client-side key
   OPENAI_API_KEY: z.string().default(""),
-  POSTBRIDGE_API_KEY: z.string().min(1, "POSTBRIDGE_API_KEY is required"),
+  // Make Post-Bridge key optional so the app can run without server keys
+  POSTBRIDGE_API_KEY: z.string().default(""),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

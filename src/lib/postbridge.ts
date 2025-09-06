@@ -64,10 +64,26 @@ export async function fetchSocialAccounts(apiKeyOverride?: string): Promise<Soci
 
 export async function createPost(payload: CreatePostPayload, apiKeyOverride?: string): Promise<CreatedPost> {
   const url = `${getBaseUrl()}/v1/posts`;
+  const caption = payload.content?.default?.text ?? "";
+  if (!caption.trim()) {
+    throw new Error("Caption is empty. Edit the tweet or remove it before scheduling.");
+  }
+  const socialAccounts = (payload.socialAccountIds || []).map((id) => {
+    const n = Number(id);
+    return Number.isFinite(n) ? n : id;
+  });
+  if (!socialAccounts.length) {
+    throw new Error("No social account selected.");
+  }
+  const body = {
+    caption,
+    scheduled_at: payload.scheduledAt,
+    social_accounts: socialAccounts,
+  } as const;
   const res = await fetch(url, {
     method: "POST",
     headers: getHeaders(apiKeyOverride),
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
     const text = await res.text();

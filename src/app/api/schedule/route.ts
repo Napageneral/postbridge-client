@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const results: { index: number; text: string; scheduledAt: string; id: string }[] = [];
 
     for (let i = 0; i < tweets.length; i++) {
-      const text = tweets[i];
+      const text = (tweets[i] || "").trim();
       const scheduledAt = first.plus({ days: i }).toUTC().toISO();
       if (!scheduledAt) throw new Error("Failed to compute schedule time");
 
